@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Prisma schema for the Reservation (todo-style) app.
+// Cleaned up to match exactly what the front-end uses: User + Reservation.
 
 generator client {
   provider = "prisma-client-js"
@@ -10,102 +10,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// enum Role {
-//   USER
-//   ADMIN
-// }
-
 model User {
   id           Int           @id @default(autoincrement())
-  firstName    String
-  lastName     String
-  email        String
+  firstName    String        @map("first_name")
+  lastName     String        @map("last_name")
+  email        String        @unique
   phone        String
-  username     String?
-  password     String?
-  // roleId       Role          @default(USER)
-  // createAt     DateTime
-  // updateAt     DateTime
-  // status       String
-  // Review       Review[]
+  username     String        @unique
+  password     String
   reservations Reservation[]
-  // playments    Playment[]
 
   @@map("users")
 }
 
-model Restaurant {
-  id             Int           @id @default(autoincrement())
-  restaurantName String
-  address        String
-  phone          String
-  description    String
-  Menu           Menu[]
-  // Review         Review[]
-  reservations   Reservation[]
-
-  @@map("restaurants")
-}
-
-// model Review {
-//   id           Int         @id @default(autoincrement())
-//   rate         String
-//   comment      String
-//   create_at    DateTime
-//   users        User?       @relation(fields: [userId], references: [id])
-//   userId       Int?
-//   Restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
-//   restaurantId Int?
-
-//   @@map("reviews")
-// }
-
-model MenuImg {
-  id  Int    @id @default(autoincrement())
-  url String
-
-  @@map("menuImgs")
-}
-
-model Menu {
-  id           Int         @id @default(autoincrement())
-  name         String
-  Restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
-  restaurantId Int?
-
-  @@map("menus")
-}
-
-// model Reservation {
-//   id           Int         @id @default(autoincrement())
-//   // bookingTable String
-//   bookingDate  String
-//   status       Status
-//   update       String
-//   User         User?       @relation(fields: [userId], references: [id])
-//   userId       Int?
-//   typetables   Typetable[]
-//   // Playment     Playment?   @relation(fields: [playmentId], references: [id])
-//   // playmentId   Int?
-//   Restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
-//   restaurantId Int?
-
-//   @@map("reservations")
-// }
-
 model Reservation {
-  id           Int         @id @default(autoincrement())
-  status       Status      @default(medium)
-  dueDate      DateTime    @map("due_date") @db.Date
-  userId       Int         @map("user_id")
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt    DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
-  typetables   Typetable[]
-  // Playment     Playment?   @relation(fields: [playmentId], references: [id])
-  // playmentId   Int?
-  Restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
-  restaurantId Int?
+  id        Int      @id @default(autoincrement())
+  title     String
+  status    Status   @default(medium)
+  dueDate   DateTime @map("due_date")
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("reservations")
 }
@@ -114,32 +40,3 @@ enum Status {
   vip
   medium
 }
-
-model Typetable {
-  id            Int          @id @default(autoincrement())
-  type_name     String
-  // price         String
-  Reservation   Reservation? @relation(fields: [reservationId], references: [id])
-  reservationId Int?
-
-  @@map("typetables")
-}
-
-model Bookingstatus {
-  id          Int    @id @default(autoincrement())
-  status_name String
-
-  @@map("bookingstatuss")
-}
-
-// model Playment {
-//   id           Int           @id @default(autoincrement())
-//   price        String
-//   create_at    DateTime
-//   sleept       String
-//   User         User?         @relation(fields: [userId], references: [id])
-//   userId       Int?
-//   reservations Reservation[]
-
-//   @@map("playments")
-// }

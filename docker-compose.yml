@@ -1,0 +1,49 @@
+# Full stack: MySQL + back-end (Express/Prisma) + front-end (React/nginx)
+# Run everything with:  docker compose up -d --build
+name: 00-project-final-university
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: reservation-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: reservation_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - reservation_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./back-end
+    container_name: reservation-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Inside the compose network the DB host is the service name "mysql"
+      DATABASE_URL: "mysql://root:rootpass@mysql:3306/reservation_db"
+      JWT_SECRET: "dev_super_secret_change_me_3f9a72b1c8e4"
+      PORT: "8889"
+    ports:
+      - "8889:8889"
+    # Sync schema + seed (idempotent), then start the server
+    command: sh -c "npx prisma db push --skip-generate && node prisma/seed.js && node app.js"
+
+  frontend:
+    build: ./front-end
+    container_name: reservation-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  reservation_mysql_data:

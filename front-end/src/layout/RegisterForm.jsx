@@ -1,7 +1,9 @@
 import axios from "axios";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function RegisterForm() {
+  const navigate = useNavigate();
   const [input, setInput] = useState({
     firstName: "",
     lastName: "",
@@ -9,6 +11,7 @@ export default function RegisterForm() {
     phone: "",
     username: "",
     password: "",
+    confirmPassword: "",
   });
 
   const hdlChange = (e) => {
@@ -22,12 +25,12 @@ export default function RegisterForm() {
         return alert("Please check confirm password");
       }
       const rs = await axios.post("http://localhost:8889/auth/register", input);
-      console.log(rs);
       if (rs.status === 200) {
         alert("Register Successful");
+        navigate("/");
       }
     } catch (err) {
-      console.log(err.message);
+      alert(err.response?.data?.error || err.message);
     }
   };
 

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Fade } from "react-awesome-reveal";
 
 import table from "../media/table-crowd.jpg";
@@ -12,8 +13,11 @@ import "../css/contact.css";
 import "../css/Todo.css";
 
 export default function NewTodoForm() {
+  const navigate = useNavigate();
   const [input, setInput] = useState({
+    title: "",
     dueDate: new Date().toISOString().split("T")[0],
+    status: "medium",
   });
 
   const hdlChange = (e) => {
@@ -23,14 +27,18 @@ export default function NewTodoForm() {
   const hdlSubmit = async (e) => {
     try {
       e.preventDefault();
+      if (!input.title.trim()) {
+        return alert("Please enter a title");
+      }
       const output = { ...input, dueDate: new Date(input.dueDate) };
       const token = localStorage.getItem("token");
-      const rs = await axios.post("http://localhost:8889/Reservation", output, {
+      await axios.post("http://localhost:8889/Reservation", output, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Create new OK");
+      navigate("/userhome");
     } catch (err) {
-      alert(err.message);
+      alert(err.response?.data?.error || err.message);
     }
   };
 
@@ -63,25 +71,42 @@ export default function NewTodoForm() {
                 <form className="Tform-container" onSubmit={hdlSubmit}>
                   <div className="form-control w-full max-w-[220px]">
                     <div className="label">
+                      <span className="label-text text-white">Title</span>
+                    </div>
+                    <input
+                      className="Tp"
+                      type="text"
+                      name="title"
+                      placeholder="What to reserve / do"
+                      value={input.title}
+                      onChange={hdlChange}
+                    />
+                  </div>
+                  <div className="form-control w-full max-w-[220px]">
+                    <div className="label">
                       <span className="label-text text-white">Due Date</span>
                     </div>
                     <input
                       className="Tp"
                       type="date"
                       name="dueDate"
-                      value={input.dueDate.split("T")[0]}
-                      onChange={(e) =>
-                        hdlChange({
-                          target: {
-                            name: "dueDate",
-                            value:
-                              e.target.value +
-                              "T" +
-                              input.dueDate.split("T")[1],
-                          },
-                        })
-                      }
+                      value={input.dueDate}
+                      onChange={hdlChange}
                     />
+                  </div>
+                  <div className="form-control w-full max-w-[220px]">
+                    <div className="label">
+                      <span className="label-text text-white">Status</span>
+                    </div>
+                    <select
+                      className="Tp"
+                      name="status"
+                      value={input.status}
+                      onChange={hdlChange}
+                    >
+                      <option value="medium">medium</option>
+                      <option value="vip">vip</option>
+                    </select>
                   </div>
                   <div className="flex Bontent1 Bmt1 Bmt2">
                     <button className="Bbook-btn">BOOK A TABLE</button>

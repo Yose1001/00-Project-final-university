@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 export default function ModalEdit(props) {
   const { el, closeModal, setTrigger } = props;
   const [input, setInput] = useState({
+    title: "",
     dueDate: new Date().toISOString().split("T")[0],
     status: "",
   });
   const [status, setStatus] = useState([]);
 
+  // Load the available status options (cached in localStorage).
   useEffect(() => {
     let allStatus = JSON.parse(localStorage.getItem("status"));
     if (allStatus) {
@@ -28,6 +30,16 @@ export default function ModalEdit(props) {
     run();
   }, []);
 
+  // Pre-fill the form with the selected item whenever it changes.
+  useEffect(() => {
+    if (!el) return;
+    setInput({
+      title: el.title ?? "",
+      dueDate: new Date(el.dueDate).toISOString().split("T")[0],
+      status: el.status ?? "",
+    });
+  }, [el]);
+
   const hdlChange = (e) => {
     setInput((prv) => ({ ...prv, [e.target.name]: e.target.value }));
   };
@@ -37,17 +49,13 @@ export default function ModalEdit(props) {
 
       const output = { ...input, dueDate: new Date(input.dueDate) };
       const token = localStorage.getItem("token");
-      const rs = await axios.put(
-        `http://localhost:8889/Reservation/${el.id}`,
-        output,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await axios.put(`http://localhost:8889/Reservation/${el.id}`, output, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       alert("Update OK");
       setTrigger((prv) => !prv);
     } catch (err) {
-      alert(err.message);
+      alert(err.response?.data?.error || err.message);
     }
   };
 
@@ -58,6 +66,18 @@ export default function ModalEdit(props) {
           className="flex flex-col border rounded w-5/6 mx-auto p-4 gap-6"
           onSubmit={hdlSubmit}
         >
+          <label className="form-control w-full max-w-[220px] ">
+            <div className="label">
+              <span className="label-text">Title</span>
+            </div>
+            <input
+              className="input input-bordered"
+              type="text"
+              name="title"
+              value={input.title}
+              onChange={hdlChange}
+            />
+          </label>
           <label className="form-control w-full max-w-[220px] ">
             <div className="label">
               <span className="label-text">Due Date</span>

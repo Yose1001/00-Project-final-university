@@ -11,6 +11,17 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+// request logger — shows every API call + result status in the terminal
+app.use((req, res, next) => {
+  const start = Date.now()
+  res.on('finish', () => {
+    const ms = Date.now() - start
+    const mark = res.statusCode < 400 ? '✅' : '❌'
+    console.log(`${mark} ${req.method} ${req.originalUrl} → ${res.statusCode} (${ms}ms)`)
+  })
+  next()
+})
+
 // service
 app.use('/auth', authRoute)
 app.use('/Reservation', todoRoute)

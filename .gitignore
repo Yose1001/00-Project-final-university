@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Env / secrets
+.env
+*.local
+
+# Build output
+dist/
+build/
+
+# Prisma local engine cache (host workaround dir)
+.prisma-home/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
